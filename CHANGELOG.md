@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### fix
+
+- 修复伤害预测未计入蟹之怒在盟友死亡后获得的格挡的问题。<br>
+  Fixed damage predictions missing the Block granted by Crab Rage after an ally dies.
+
 ## v0.13.14
 
 ### fix

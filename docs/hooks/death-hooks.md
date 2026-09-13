@@ -47,7 +47,7 @@ Mirror files:
 | `AdaptablePower` | 适者生存 | Revives/transitions Test Subject. | Missing; not implementable without revive/combat-structure support. |
 | `ConstrictPower` | 紧缠 | Removes this power when applier dies. | Missing; power removal unsupported. |
 | `DampenPower` | 抑制 | Removes/decrements delayed card downgrade state. | Missing; power removal/card mutation flow unsupported. |
-| `CrabRagePower` | 蟹之怒 | When ally dies, applies Strength and gains block. | Missing. Block portion is implementable, Apply Power is not; should remain risk or partial only. |
+| `CrabRagePower` | 蟹之怒 | When another same-side creature dies, applies Strength, gains 99 block, then removes itself. | Partial: grants the configured BlockVar through simulator GainBlock and consumes a prediction-local amount to prevent repeated grants. Strength application and power removal/listener changes remain unsupported and record incomplete risk when triggered. |
 | `CoveredPower` | 掩护 | Removes covered/intercept state when applier dies. | Missing; power removal unsupported. |
 | `InfestedPower` | 寄生物 | Death-triggered infestation behavior. | Missing; likely spawn/apply-power flow, unsupported. |
 | `GuardedPower` | 护卫 | Removes guard relation when guard dies. | Missing; power removal unsupported. |
@@ -74,6 +74,11 @@ Mirror files:
 
 ## Parity notes
 
+- `CrabRagePower` preserves the original owner/side checks, including triggering when `wasRemovalPrevented` is true.
+  Its block uses the normal block modifiers/hooks and shadow dead/combat-ending guards. Only its own repeated
+  block grant is suppressed after consumption; the live power and listener enumeration remain unchanged.
+  The preceding Strength application and the final removal lifecycle remain deferred. Regression coverage in
+  `CrabRageTests` checks following-hit mitigation, trigger guards, one-time consumption, risk and live-state isolation.
 - `CombatPredictionSimulator` updates shadow liveness, runs before/after death registries, records shadow creature removal for supported enemy death paths, mirrors selected player death cleanup, and records the pending-loss boundary when all shadow players are dead.
 - The simulator derives combat-ending state from shadow primary-enemy liveness and `ShouldStopCombatFromEnding`; guarded hook dispatch stops at that boundary while death hooks remain unguarded. Full victory/loss teardown only occurs when a caller invokes the prediction safe-point `CheckWinCondition`.
 - `ShouldStopCombatFromEnding` and `ShouldCreatureBeRemovedFromCombatAfterDeath` preserve vanilla's direct unguarded

@@ -3,7 +3,9 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Cards;
 using MegaCrit.Sts2.Core.Models.Monsters;
+using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.Models.Relics;
+using RandomForeseer.RandomForeseerCode.Common;
 using RandomForeseer.RandomForeseerCode.Common.Mirrors;
 
 namespace RandomForeseer.RandomForeseerCode.InCombat.Mirrors.Hooks.Death;
@@ -44,10 +46,31 @@ internal static class AfterDeathMirrors
         registry.RegisterIgnored<Vantom>();
         registry.RegisterIgnored<WaterfallGiant>();
 
+        registry.Register<CrabRagePower>(HandleCrabRagePower);
         registry.Register<GremlinHorn>(HandleGremlinHorn);
         registry.Register<Melancholy>(HandleMelancholy);
 
         return registry;
+    }
+
+    private static void HandleCrabRagePower(CrabRagePower power, AfterDeathMirrorContext context)
+    {
+        if (context.Creature == power.Owner || context.Creature.Side != power.Owner.Side)
+        {
+            return;
+        }
+
+        var state = context.StateStore.GetPowerAmount(power);
+        if (!state.IsActive)
+        {
+            return;
+        }
+
+        // Strength application and power removal callbacks/listener membership remain unmodeled.
+        // Vanilla does not check WasRemovalPrevented before granting block.
+        context.History.RecordRisk(PredictionRiskReason.MethodMirrorIncomplete);
+        context.Simulator.GainBlock(power.Owner, power.DynamicVars.Block);
+        state.Consume();
     }
 
     private static void HandleGremlinHorn(GremlinHorn relic, AfterDeathMirrorContext context)
