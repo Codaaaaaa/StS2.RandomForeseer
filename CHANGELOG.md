@@ -7,6 +7,11 @@
 - 修复伤害预测未计入蟹之怒在盟友死亡后获得的格挡的问题。<br>
   Fixed damage predictions missing the Block granted by Crab Rage after an ally dies.
 
+### misc
+
+- 更新 RitsuLib 依赖到 0.5.14。<br>
+  Updated the RitsuLib dependency to 0.5.14.
+
 ## v0.13.14
 
 ### fix

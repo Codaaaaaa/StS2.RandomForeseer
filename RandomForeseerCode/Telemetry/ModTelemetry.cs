@@ -10,6 +10,7 @@ namespace RandomForeseer.RandomForeseerCode.Telemetry;
 
 internal static class ModTelemetry
 {
+    internal const string ManualCaptureSourcePrefix = "random_foreseer/";
     private const int MaxRecentExceptionFingerprints = 128;
 
     private static readonly Lock ExceptionFingerprintLock = new();
@@ -47,6 +48,7 @@ internal static class ModTelemetry
                 },
                 TelemetryRequest.ModInventory(T("telemetry.mod_inventory.description")),
                 TelemetryRequest.Diagnostics(T("telemetry.diagnostics.description"))
+                    .WithCaptureFilter(ModTelemetryFilter.ShouldCapture)
             ]
         });
 
@@ -78,7 +80,7 @@ internal static class ModTelemetry
             var properties = new Dictionary<string, object?>
             {
                 ["capture_mode"] = "manual",
-                ["capture_source"] = $"random_foreseer/{subsystem}",
+                ["capture_source"] = $"{ManualCaptureSourcePrefix}{subsystem}",
                 ["subsystem"] = subsystem,
                 ["operation"] = operation
             };
