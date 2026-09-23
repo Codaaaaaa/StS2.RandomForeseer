@@ -131,11 +131,15 @@ internal sealed class RunPredictionPlayerRngSet
 {
     public required Rng Rewards { get; init; }
 
+    /// <summary>Shop inventory generation and every merchant price roll run on this stream.</summary>
+    public required Rng Shops { get; init; }
+
     public static RunPredictionPlayerRngSet From(PlayerRngSet rng)
     {
         return new RunPredictionPlayerRngSet
         {
-            Rewards = PredictionUtils.CloneRng(rng.Rewards)
+            Rewards = PredictionUtils.CloneRng(rng.Rewards),
+            Shops = PredictionUtils.CloneRng(rng.Shops)
         };
     }
 
@@ -143,7 +147,8 @@ internal sealed class RunPredictionPlayerRngSet
     {
         return new RunPredictionPlayerRngSet
         {
-            Rewards = PredictionUtils.CloneRng(Rewards)
+            Rewards = PredictionUtils.CloneRng(Rewards),
+            Shops = PredictionUtils.CloneRng(Shops)
         };
     }
 }

@@ -35,6 +35,20 @@ internal sealed class RandomForeseerSettingsData
 
     public bool EnableNextActPrediction { get; set; } = true;
 
+    public bool EnableCombatRewardForecast { get; set; } = true;
+
+    public int CombatRewardForecastCount { get; set; } = 3;
+
+    public bool EnableMapPointForecast { get; set; } = true;
+
+    public bool EnableShopForecast { get; set; } = true;
+
+    public bool EnableEliteRewardForecast { get; set; } = true;
+
+    public bool EnableAncientOfferForecast { get; set; } = true;
+
+    public bool EnableEarlyNextActPrediction { get; set; } = true;
+
     public int SlipperyBridgeRerollPreviewCount { get; set; } = 5;
 
     public bool EnablePotionCardPrediction { get; set; } = true;
@@ -184,6 +198,62 @@ internal static class RandomForeseerSettings
             settings => settings.EnableNextActPrediction,
             (settings, value) => settings.EnableNextActPrediction = value)
         .WithDefault(() => Default.EnableNextActPrediction);
+
+    private static readonly IModSettingsValueBinding<bool> EnableCombatRewardForecastBinding =
+        ModSettingsBindings.Global<RandomForeseerSettingsData, bool>(
+            Entry.ModId,
+            DataKey,
+            settings => settings.EnableCombatRewardForecast,
+            (settings, value) => settings.EnableCombatRewardForecast = value)
+        .WithDefault(() => Default.EnableCombatRewardForecast);
+
+    private static readonly IModSettingsValueBinding<bool> EnableMapPointForecastBinding =
+        ModSettingsBindings.Global<RandomForeseerSettingsData, bool>(
+            Entry.ModId,
+            DataKey,
+            settings => settings.EnableMapPointForecast,
+            (settings, value) => settings.EnableMapPointForecast = value)
+        .WithDefault(() => Default.EnableMapPointForecast);
+
+    private static readonly IModSettingsValueBinding<bool> EnableShopForecastBinding =
+        ModSettingsBindings.Global<RandomForeseerSettingsData, bool>(
+            Entry.ModId,
+            DataKey,
+            settings => settings.EnableShopForecast,
+            (settings, value) => settings.EnableShopForecast = value)
+        .WithDefault(() => Default.EnableShopForecast);
+
+    private static readonly IModSettingsValueBinding<bool> EnableAncientOfferForecastBinding =
+        ModSettingsBindings.Global<RandomForeseerSettingsData, bool>(
+            Entry.ModId,
+            DataKey,
+            settings => settings.EnableAncientOfferForecast,
+            (settings, value) => settings.EnableAncientOfferForecast = value)
+        .WithDefault(() => Default.EnableAncientOfferForecast);
+
+    private static readonly IModSettingsValueBinding<bool> EnableEarlyNextActPredictionBinding =
+        ModSettingsBindings.Global<RandomForeseerSettingsData, bool>(
+            Entry.ModId,
+            DataKey,
+            settings => settings.EnableEarlyNextActPrediction,
+            (settings, value) => settings.EnableEarlyNextActPrediction = value)
+        .WithDefault(() => Default.EnableEarlyNextActPrediction);
+
+    private static readonly IModSettingsValueBinding<bool> EnableEliteRewardForecastBinding =
+        ModSettingsBindings.Global<RandomForeseerSettingsData, bool>(
+            Entry.ModId,
+            DataKey,
+            settings => settings.EnableEliteRewardForecast,
+            (settings, value) => settings.EnableEliteRewardForecast = value)
+        .WithDefault(() => Default.EnableEliteRewardForecast);
+
+    private static readonly IModSettingsValueBinding<int> CombatRewardForecastCountBinding =
+        ModSettingsBindings.Global<RandomForeseerSettingsData, int>(
+            Entry.ModId,
+            DataKey,
+            settings => settings.CombatRewardForecastCount,
+            (settings, value) => settings.CombatRewardForecastCount = value)
+        .WithDefault(() => Default.CombatRewardForecastCount);
 
     private static readonly IModSettingsValueBinding<int> SlipperyBridgeRerollPreviewCountBinding =
         ModSettingsBindings.Global<RandomForeseerSettingsData, int>(
@@ -353,6 +423,20 @@ internal static class RandomForeseerSettings
     public static bool EnableCrystalSphereClairvoyance => EnableCrystalSphereClairvoyanceBinding.Read();
 
     public static bool EnableNextActPrediction => EnableNextActPredictionBinding.Read();
+
+    public static bool EnableCombatRewardForecast => EnableCombatRewardForecastBinding.Read();
+
+    public static int CombatRewardForecastCount => Math.Clamp(CombatRewardForecastCountBinding.Read(), 1, 10);
+
+    public static bool EnableMapPointForecast => EnableMapPointForecastBinding.Read();
+
+    public static bool EnableShopForecast => EnableShopForecastBinding.Read();
+
+    public static bool EnableEliteRewardForecast => EnableEliteRewardForecastBinding.Read();
+
+    public static bool EnableAncientOfferForecast => EnableAncientOfferForecastBinding.Read();
+
+    public static bool EnableEarlyNextActPrediction => EnableEarlyNextActPredictionBinding.Read();
 
     public static int SlipperyBridgeRerollPreviewCount => Math.Clamp(SlipperyBridgeRerollPreviewCountBinding.Read(), 1, 10);
 
@@ -543,6 +627,51 @@ internal static class RandomForeseerSettings
                     Text("toggle.enable_next_act_prediction.label"),
                     EnableNextActPredictionBinding,
                     Text("toggle.enable_next_act_prediction.description"));
+
+                section.AddToggle(
+                    "enable_combat_reward_forecast",
+                    Text("toggle.enable_combat_reward_forecast.label"),
+                    EnableCombatRewardForecastBinding,
+                    Text("toggle.enable_combat_reward_forecast.description"));
+
+                section.AddToggle(
+                    "enable_map_point_forecast",
+                    Text("toggle.enable_map_point_forecast.label"),
+                    EnableMapPointForecastBinding,
+                    Text("toggle.enable_map_point_forecast.description"));
+
+                section.AddToggle(
+                    "enable_early_next_act_prediction",
+                    Text("toggle.enable_early_next_act_prediction.label"),
+                    EnableEarlyNextActPredictionBinding,
+                    Text("toggle.enable_early_next_act_prediction.description"));
+
+                section.AddToggle(
+                    "enable_elite_reward_forecast",
+                    Text("toggle.enable_elite_reward_forecast.label"),
+                    EnableEliteRewardForecastBinding,
+                    Text("toggle.enable_elite_reward_forecast.description"));
+
+                section.AddToggle(
+                    "enable_shop_forecast",
+                    Text("toggle.enable_shop_forecast.label"),
+                    EnableShopForecastBinding,
+                    Text("toggle.enable_shop_forecast.description"));
+                section.AddToggle(
+                    "enable_ancient_offer_forecast",
+                    Text("toggle.enable_ancient_offer_forecast.label"),
+                    EnableAncientOfferForecastBinding,
+                    Text("toggle.enable_ancient_offer_forecast.description"));
+
+                section.AddIntSlider(
+                    "combat_reward_forecast_count",
+                    Text("slider.combat_reward_forecast_count.label"),
+                    CombatRewardForecastCountBinding,
+                    1,
+                    10,
+                    1,
+                    value => value.ToString(),
+                    Text("slider.combat_reward_forecast_count.description"));
             });
 
             page.AddSection("in_combat_prediction", section =>

@@ -393,7 +393,7 @@ internal static class RelicPickupPrediction
             .ForRoom(context.Player, RoomType.Monster)
             .WithFlags(CardCreationFlags.IsCardReward);
 
-        OutOfCombatPredictionUtils.FastForwardBeforeMonsterCardReward(context);
+        _ = OutOfCombatPredictionUtils.FastForwardBeforeMonsterCardReward(context);
 
         var cards = CardRewardPrediction.PredictCards(
             context,

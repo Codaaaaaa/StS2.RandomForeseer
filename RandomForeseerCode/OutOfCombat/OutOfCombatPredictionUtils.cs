@@ -254,24 +254,33 @@ internal static class OutOfCombatPredictionUtils
     {
         // Normal monster rewards are generated before event-specific follow-up rewards.
         // Mirrors RewardsSet.AddRewardsTo plus RewardsSet.RollForPotionAndAddTo before the CardReward.
-        FastForwardBeforeMonsterCardReward(context);
+        _ = FastForwardBeforeMonsterCardReward(context);
 
         var options = CardCreationOptions.ForRoom(context.Player, RoomType.Monster)
             .WithFlags(CardCreationFlags.IsCardReward);
         _ = CardRewardPrediction.PredictCards(context, 3, options);
     }
 
-    public static void FastForwardBeforeMonsterCardReward(RunPredictionContext context)
+    /// <summary>
+    /// Advances a prediction context through the pre-card part of one monster room's reward set and returns the
+    /// potion reward it generates, or <see langword="null"/> when that room offers no potion.
+    /// </summary>
+    /// <param name="roomType">
+    /// The combat room being mirrored. Potion odds are room-type sensitive, and elite rooms always award gold
+    /// while monster rooms only do when their gold proportion is above zero.
+    /// </param>
+    public static PotionModel? FastForwardBeforeMonsterCardReward(
+        RunPredictionContext context,
+        RoomType roomType = RoomType.Monster)
     {
         var shouldAddPotionReward = context.PotionRewardOdds.Roll(
             context.Player,
             RunManager.Instance.AscensionManager,
-            RoomType.Monster);
+            roomType);
 
         _ = context.Rng.Rewards.NextInt(1);
-        if (shouldAddPotionReward)
-        {
-            _ = PotionFactory.CreateRandomPotionOutOfCombat(context.Player, context.Rng.Rewards);
-        }
+        return shouldAddPotionReward
+            ? PotionFactory.CreateRandomPotionOutOfCombat(context.Player, context.Rng.Rewards)
+            : null;
     }
 }

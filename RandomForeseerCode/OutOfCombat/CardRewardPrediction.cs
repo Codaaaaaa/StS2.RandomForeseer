@@ -233,7 +233,7 @@ internal static class CardRewardPrediction
     }
 
     // Mirrors CardFactory.RollForUpgrade, mutating only the preview card.
-    private static void RollForUpgrade(Player player, CardModel card, decimal baseChance, Rng rng)
+    internal static void RollForUpgrade(Player player, CardModel card, decimal baseChance, Rng rng)
     {
         var roll = (decimal)rng.NextFloat();
         if (!card.IsUpgradable)

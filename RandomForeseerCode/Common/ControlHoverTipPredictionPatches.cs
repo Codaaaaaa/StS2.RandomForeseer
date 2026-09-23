@@ -22,6 +22,7 @@ internal static class ControlHoverTipPredictionPatch
         var registry = new PredictionHoverTipRegistry<Control>();
 
         registry.Register("merchant entry", MerchantEntryHoverTips.GetHoverTips);
+        registry.Register("map point", MapPointHoverTips.GetHoverTips);
         registry.Register("transform selection", TransformSelectionHoverTips.GetHoverTips);
         registry.Register("treasure room relic", TreasureRoomRelicHoverTips.GetHoverTips);
         registry.Register("rest site", RestSiteHoverTips.GetHoverTips);

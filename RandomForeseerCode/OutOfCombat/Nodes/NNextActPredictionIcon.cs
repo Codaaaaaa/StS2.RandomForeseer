@@ -25,7 +25,7 @@ internal sealed partial class NNextActPredictionIcon : NClickableControl
     private static readonly StringName TintColor = new("tint_color");
 
     private NextActPredictionIconKind _kind;
-    private HoverTip? _hoverTip;
+    private IReadOnlyList<IHoverTip> _hoverTips = [];
 
     private TextureRect _icon = null!;
     private TextureRect _outline = null!;
@@ -49,7 +49,7 @@ internal sealed partial class NNextActPredictionIcon : NClickableControl
 
     public void SetPrediction(ActModel nextAct)
     {
-        _hoverTip = CreateHoverTip(nextAct, _kind);
+        _hoverTips = CreateHoverTips(nextAct, _kind);
 
         var (pointType, roomType, modelId) = _kind switch
         {
@@ -64,12 +64,13 @@ internal sealed partial class NNextActPredictionIcon : NClickableControl
 
     protected override void OnFocus()
     {
-        if (_hoverTip == null)
+        if (_hoverTips.Count == 0)
         {
             return;
         }
 
-        NHoverTipSet.CreateAndShow(this, _hoverTip)?.SetGlobalPosition(_icon.GlobalPosition + new Vector2(0f, Size.Y + 20f));
+        // Ancient offers add relic tips beyond what fits under a top bar icon.
+        PredictionHoverTipPlacement.Pin(NHoverTipSet.CreateAndShow(this, _hoverTips));
     }
 
     protected override void OnUnfocus()
@@ -144,21 +145,59 @@ internal sealed partial class NNextActPredictionIcon : NClickableControl
         }
     }
 
-    private static HoverTip CreateHoverTip(ActModel nextAct, NextActPredictionIconKind kind)
+    private static IReadOnlyList<IHoverTip> CreateHoverTips(ActModel nextAct, NextActPredictionIconKind kind)
     {
         return kind switch
         {
-            NextActPredictionIconKind.Ancient => CreateAncientHoverTip(nextAct),
-            NextActPredictionIconKind.Boss => CreateBossHoverTip(nextAct),
+            NextActPredictionIconKind.Ancient => CreateAncientHoverTips(nextAct),
+            NextActPredictionIconKind.Boss => [CreateBossHoverTip(nextAct)],
             _ => throw new InvalidOperationException($"Unknown NextActPredictionIconKind: {kind}")
         };
     }
 
-    private static HoverTip CreateAncientHoverTip(ActModel nextAct)
+    private static IReadOnlyList<IHoverTip> CreateAncientHoverTips(ActModel nextAct)
     {
-        return PredictionHoverTips.Text(
-            "next_act_ancient_prediction",
-            description => description.Add("Ancient", nextAct.Ancient.Title));
+        var tips = new List<IHoverTip>
+        {
+            PredictionHoverTips.Text(
+                "next_act_ancient_prediction",
+                description => description.Add("Ancient", nextAct.Ancient.Title))
+        };
+
+        // The offered relics render through their own vanilla relic hover tips, so they keep the
+        // original icon, frame, rarity and description without the mod shipping any relic assets.
+        var relics = PredictAncientOffers(nextAct);
+        if (relics.Count > 0)
+        {
+            tips.Add(PredictionHoverTips.Text(
+                "next_act_ancient_offers",
+                description => description.Add(
+                    "Relics",
+                    relics.Select(PredictionHoverTips.GetModelName).ToList())));
+            tips.AddRange(PredictionHoverTips.Relics(relics));
+        }
+
+        return tips;
+    }
+
+    private static IReadOnlyList<RelicModel> PredictAncientOffers(ActModel nextAct)
+    {
+        if (!RandomForeseerSettings.IsPredictionFeatureEnabled(RandomForeseerSettings.EnableAncientOfferForecast) ||
+            LocalPlayerResolver.GetLocalPlayer() is not { } player)
+        {
+            return [];
+        }
+
+        try
+        {
+            return AncientOfferForecast.PredictOffers(player, nextAct.Ancient);
+        }
+        catch (Exception ex)
+        {
+            // Each Ancient generates its options differently; an unsupported one must not break the icon.
+            Entry.Logger.Warn($"Failed to forecast Ancient relic offers: {ex}");
+            return [];
+        }
     }
 
     private static HoverTip CreateBossHoverTip(ActModel nextAct)

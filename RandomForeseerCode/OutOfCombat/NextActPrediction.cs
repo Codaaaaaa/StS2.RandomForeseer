@@ -5,6 +5,7 @@ using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Nodes.CommonUi;
 using MegaCrit.Sts2.Core.Nodes.Screens;
+using MegaCrit.Sts2.Core.Nodes.Screens.Map;
 using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.Runs;
 using RandomForeseer.RandomForeseerCode.OutOfCombat.Nodes;
@@ -33,6 +34,33 @@ internal static class NextActPrediction
     public static void ShowIfEligible(bool isTerminal, IRunState runState)
     {
         if (!ShouldShow(isTerminal, runState))
+        {
+            Hide();
+            return;
+        }
+
+        var nextAct = runState.Acts[runState.CurrentActIndex + 1];
+        foreach (var icons in ActiveIcons.ToList())
+        {
+            icons.Show(nextAct);
+        }
+    }
+
+    /// <summary>
+    /// Shows or hides the next-Act icons as the map screen opens and closes.
+    /// </summary>
+    /// <remarks>
+    /// Every Act's rooms, Ancient and bosses are generated once by <c>RunManager.GenerateRooms</c> during run
+    /// setup, so the next Act's Ancient and boss are already decided long before its Act-ending boss fight.
+    /// Restricting the icons to the boss reward screen was a presentation choice, not a data limitation.
+    /// </remarks>
+    public static void ShowOnMapIfEligible(bool isMapOpen)
+    {
+        if (!isMapOpen ||
+            !RandomForeseerSettings.EnableEarlyNextActPrediction ||
+            RunManager.Instance is not { IsInProgress: true, State: { } runState } ||
+            !RandomForeseerSettings.IsPredictionFeatureEnabled(RandomForeseerSettings.EnableNextActPrediction) ||
+            runState.CurrentActIndex + 1 >= runState.Acts.Count)
         {
             Hide();
             return;
@@ -187,6 +215,23 @@ internal static class NextActPredictionTopBarPatches
     private static void Initialize(NTopBar __instance)
     {
         NextActPrediction.Initialize(__instance);
+    }
+}
+
+[HarmonyPatch(typeof(NMapScreen), "IsOpen", MethodType.Setter)]
+internal static class NextActPredictionMapScreenPatches
+{
+    [HarmonyPostfix]
+    private static void ShowPrediction(bool value)
+    {
+        try
+        {
+            NextActPrediction.ShowOnMapIfEligible(value);
+        }
+        catch (Exception ex)
+        {
+            Entry.Logger.Warn($"Next-Act prediction failed on the map screen: {ex}");
+        }
     }
 }
 
